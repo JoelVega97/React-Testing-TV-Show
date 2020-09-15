@@ -1,9 +1,9 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "../App";
 
-import { fetchShow } from "../api/fetchShow";
+import { fetchShow as mockFetch } from "../api/fetchShow";
 
 jest.mock("../api/fetchShow");
 
@@ -112,8 +112,23 @@ const mockData = {
   ],
 };
 
+mockFetch.mockResolvedValue(mockData);
+
 test("render w/o error", () => {
   render(<App />);
 });
 
-fetchShow.mockResolveValue(mockData);
+test("renders episodes once the API is called", async () => {
+  render(<App />);
+
+  const dropdown = await waitFor(() =>
+    screen.findByPlaceholderText(/select an option/i)
+  );
+  const seasonOne = screen.findByText(/season 1/i);
+
+  userEvent.click(dropdown);
+
+  //   await waitFor(() => screen.getAllByTestId(/episodes/i));
+
+  //   expect(screen.getAllByTestId(/episodes/i)).toHaveLength(4);
+});
